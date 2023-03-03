@@ -1,0 +1,22 @@
+---
+# Variables to be defined in the inventory
+
+## Default
+## A list of dictionaries.
+## The full list of possible parameters can be found at
+## https://github.com/freeipa/ansible-freeipa/blob/master/README-hbac.md
+rhidm_hbac_rules[]:
+#  - name: allow_all
+#    state: disabled
+#
+#  - name: allow_client
+#    host:
+#      - host1
+#      - host2
+#    hostgroup:
+#      - hostgroup_name
+#      - hostgroup_name2
+#    group: usergroup
+#    user: testuser
+
+

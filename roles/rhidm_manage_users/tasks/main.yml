@@ -1,0 +1,40 @@
+---
+
+- name: Manage users
+  become: true
+  freeipa.ansible_freeipa.ipauser:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name | default(item.first[0] + item.last) }}"
+    first: "{{ item.first | default('') if item.state | default('present') == 'present' else omit }}"
+    last: "{{ item.last | default('') if item.state | default('present') == 'present' else omit  }}"
+    uid: "{{ item.uid | default(omit) if item.state | default('present') == 'present' else omit }}"
+    gid: "{{ item.gid | default(item.uid) | default(omit) if item.state | default('present') == 'present' else omit }}"
+    state: "{{ item.state | default('present') }}"
+    preserve: "{{ item.preserve | default(omit) }}"
+    loginshell: "{{ item.loginshell | default(omit) if item.state | default('present') == 'present' else omit }}"
+    homedir: "{{ item.homedir | default(omit) if item.state | default('present') == 'present' else omit }}"
+    email: "{{ item.email | default(omit) if item.state | default('present') == 'present' else omit  }}"
+    sshpubkey: "{{ item.ssh_key_pub_list | default(omit) }}"
+    password: "{{ item.password | default('changeme') if item.state | default('present') == 'present' else omit }}"
+    update_password: "{{ 'on_create' if item.state | default('present') == 'present' else omit }}"
+  loop: "{{ rhidm_user_list | json_query('[?name!=`admin`]') | list }}"
+  loop_control:
+    label: "{{ item.name | default(item.first[0] + item.last) }} - {{ item.state | default('present') }}"
+  tags:
+    - rhidm_config_users
+    - rhidm_config_users_create
+
+- name: Apply roles to users
+  become: true
+  freeipa.ansible_freeipa.iparole:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    ipaapi_context: server
+    name: "{{ item.name }}"
+    user: "{{ item.users }}"
+    action: member
+  loop: "{{ __user_role_list | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - rhidm_config_users
+    - rhidm_config_users_roles

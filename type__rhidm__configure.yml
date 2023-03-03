@@ -1,0 +1,7 @@
+:q---
+- name: Configure the RH IDM domain
+  hosts: "{{ __config_host | default(groups['rhidm_master'][0]) | default('localhost') }}"
+  roles:
+    - rhidm_configure
+
+...

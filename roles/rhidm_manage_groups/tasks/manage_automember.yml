@@ -1,0 +1,51 @@
+---
+## Task file to manage the user group automember rules
+- name: Create or delete Automember rules for Users
+  freeipa.ansible_freeipa.ipaautomember:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) | trim }}"
+    automember_type: group
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_group_auto_member }}"
+  loop_control:
+    label: "{{ item.name }} - {{ item.state | default('present') }}"
+  notify: Rebuild Automember
+  tags:
+    - rhidm_config_group_auto_member
+
+- name: Manage User Automember include and exclude rules
+  block:
+    - name: Add Automember conditions
+      freeipa.ansible_freeipa.ipaautomember:
+        ipaadmin_password: "{{ rhidm_admin_password }}"
+        ipaapi_context: server
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        automember_type: group
+        action: member
+        state: present
+        inclusive: "{{ item.inrulesp | default(omit) }}"
+        exclusive: "{{ item.exrulesp | default(omit) }}"
+      notify: "Rebuild Automember"
+      loop: "{{ rhidm_group_auto_member | selectattr('state', 'equalto', 'present') | list | json_query('[? inrulesp || exrulesp]') | list }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Remove Automember conditions
+      freeipa.ansible_freeipa.ipaautomember:
+        ipaadmin_password: "{{ rhidm_admin_password }}"
+        ipaapi_context: server
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        automember_type: group
+        action: member
+        state: absent
+        inclusive: "{{ item.inrulesa | default(omit) }}"
+        exclusive: "{{ item.exrulesa | default(omit) }}"
+      notify: "Rebuild Automember"
+      loop: "{{ rhidm_group_auto_member | selectattr('state', 'equalto', 'present') | list | json_query('[? inrulesa || exrulesa]') | list }}"
+      loop_control:
+        label: "{{ item.name }}"
+  tags:
+    - rhidm_config_group_auto_member

@@ -1,0 +1,43 @@
+---
+- name: Manage HBAC rules
+  freeipa.ansible_freeipa.ipahbacrule:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) | trim }}"
+    usercategory: "{{ item.usercategory | default('all') if item.usercategory is undefined and item.state | default('present') != 'absent' and item.state | default('present') != 'disabled' else omit }}"
+    hostcategory: "{{ item.hostcategory | default('all') if item.hostcategory is undefined and item.state | default('present') != 'absent' and item.state | default('present') != 'disabled' and item.host | default([]) is undefined else omit }}"
+    servicecategory: "{{ item.servicecategory | default('all') if item.service is undefined and item.state | default('present') != 'absent' and item.state | default('present') != 'disabled' else omit }}"
+    host: "{{ item.host | default(omit) }}"
+    hostgroup: "{{ item.hostgroup | default(omit) }}"
+    hbacsvc: "{{ item.service | default(omit) }}"
+    hbacsvcgroup: "{{ item.servicegroup | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    group: "{{ item.usergroup | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_hbac_rules }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_hbac
+
+- name: Manage HBAC membership
+  freeipa.ansible_freeipa.ipahbacrule:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) | trim }}"
+    host: "{{ item.host | default(omit) }}"
+    hostgroup: "{{ item.hostgroup | default(omit) }}"
+    hbacsvc: "{{ item.service | default(omit) }}"
+    hbacsvcgroup: "{{ item.servicegroup | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    group: "{{ item.usergroup | default(omit) }}"
+    action: member
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_hbac_rules | json_query('[? servicecategory || servicecategory
+    || host || hostgroup || hbacsvc || hbacsvcgroup || user || group ]') }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_hbac

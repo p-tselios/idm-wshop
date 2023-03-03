@@ -1,0 +1,24 @@
+---
+# Variables to be defined in the inventory
+
+## Default
+## Users:
+## A list of dictionaries. The whole list is passed as a an argument.
+## The full list of possible parameters can be found at
+## https://github.com/freeipa/ansible-freeipa/blob/master/README-user.md
+rhidm_user_list: []
+# - name: :
+#    uid: 999
+#    first: User
+#    last: Name
+#    email: user@example.com
+#    loginshell: "/bin/bash"
+#    homedir: "/home/uname"
+#    password: "Test"
+#    sshpubkey:
+#    state: present | absent enabled | disabled | unlocked | undeleted
+#    preserve: true | false # only if state == absent
+
+## List of dictionaries with the user-managed roles
+rhidm_privileges: []
+

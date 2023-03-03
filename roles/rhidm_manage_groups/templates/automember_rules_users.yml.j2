@@ -1,0 +1,40 @@
+{%- set tmp_group_list = tmp_group_list | default(rhidm_user_groups) -%}
+{% for ug in ( (tmp_group_list | selectattr('automember_incrules', 'defined') | list) | union(tmp_group_list | selectattr('automember_excrules', 'defined') | list) ) %}
+  - name: "{{ ug.name }}"
+    description: "{{ ug.automember_decription | default('Automember rule for the user group' +ug.name) }}"
+    state: "{{ ug.automember_state | default('present') if ug.automember_state | default('present') == ug.state | default('present') else ug.state | default('present') }}"
+    type: group
+{% if ug.automember_incrules | default([]) | json_query('[?state != `absent`]') | list | length > 0 %}
+    ### Rules to include a user/group in the group
+    inrulesp:
+{% for ar in ug.automember_incrules | json_query('[?state != `absent`]') | list %}
+      - key: '{{ ar.key }}'
+        expression: '{{ ar.expr }}'
+{% endfor %}
+{% endif %}
+{% if ug.automember_incrules | default([]) | json_query('[?state == `absent`]') | list | length > 0 %}
+    ### Delete rules
+    inrulesa:
+{% for ar in ug.automember_incrules | json_query('[?state == `absent`]') | list %}
+      - key: '{{ ar.key }}'
+        expression: '{{ ar.expr }}'
+{% endfor %}
+{% endif %}
+
+{% if ug.automember_excrules | default([]) | json_query('[?state != `absent`]') | list | length > 0 %}
+    ### Rules to include a user/group in the group
+    exrulesp:
+{% for ar in ug.automember_excrules | json_query('[?state != `absent`]') | list %}
+      - key: '{{ ar.key }}'
+        expression: '{{ ar.expr }}'
+{% endfor %}
+{% endif %}
+{% if ug.automember_excrules | default([]) | json_query('[?state == `absent`]') | list | length > 0 %}
+    ### Delete rules
+    exrulesa:
+{% for ar in ug.automember_excrules | json_query('[?state == `absent`]') | list %}
+      - key: '{{ ar.key }}'
+        expression: '{{ ar.expr }}'
+{% endfor %}
+{% endif %}
+{% endfor %}

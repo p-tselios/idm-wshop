@@ -1,0 +1,69 @@
+---
+- name: Verify that required parameters are set
+  ansible.builtin.assert:
+    that:
+      - rhidm_admin_principal is defined
+      - rhidm_admin_password is defined
+      - rhidm_ds_password is defined
+      - rhidm_domain_name is defined
+      - rhidm_ldap_read_user is defined
+      - rhidm_ldap_user_password is defined
+
+- name: Configure the default shell for users
+  freeipa.ansible_freeipa.ipaconfig:
+    ipaadmin_principal: "{{ rhidm_admin_principal }}"
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    defaultshell: "{{ rhidm_defaultshell | default(omit) }}"
+    defaultgroup: "{{ rhidm_defaultgroup | default(omit) }}"
+    emaildomain: "{{ rhidm_emaildomain | default(omit) }}"
+    searchtimelimit: "{{ rhidm_searchtimelimit | default(omit) }}"
+    searchrecordslimit: "{{ rhidm_searchrecordslimit | default(omit) }}"
+    groupsearch: "{{ rhidm_groupsearch | default(omit) }}"
+    domain_resolution_order: "{{ rhidm_domain_resolution_order | default(omit) }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_defaults
+
+- name: Create the default password policy
+  become: true
+  freeipa.ansible_freeipa.ipapwpolicy:
+    ipaadmin_principal: "{{ rhidm_admin_principal }}"
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    minlength: "{{ rhidm_default_pw_policy.minlength | default(omit) }}"
+    minclasses: "{{ rhidm_default_pw_policy.minclasses | default(omit) }}"
+    minlife: "{{ rhidm_default_pw_policy.minlife | default(omit) }}"
+    maxlife: "{{ rhidm_default_pw_policy.maxlife | default(omit) }}"
+    history: "{{ rhidm_default_pw_policy.history | default(omit) }}"
+    priority: "{{ rhidm_default_pw_policy.priority | default(omit) }}"
+    lockouttime: "{{ rhidm_default_pw_policy.lockouttime | default(omit) }}"
+    maxfail: "{{ rhidm_default_pw_policy.maxfail | default(omit) }}"
+    failinterval: "{{ rhidm_default_pw_policy.failinterval | default(omit) }}"
+    state: "{{ rhidm_default_pw_policy.state | default(omit) }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_defaults
+    - rhidm_config_defaults_pw_policy
+
+- name: Create LDAP bind user for Applications
+  become: true
+  ldap_entry:
+    bind_dn: "cn=Directory Manager"
+    bind_pw: "{{ rhidm_ds_password }}"
+    start_tls: true
+    server_uri: "ldap://localhost/"
+    dn: "uid={{ rhidm_ldap_read_user }},cn=sysaccounts,cn=etc,{{'dc=' + rhidm_domain_name | regex_replace('\\.', ',dc=') }}"
+    objectClass:
+      - account
+      - simplesecurityobject
+    attributes:
+      uid: "system"
+      description: "An LDAP user to allow external applications to authenticate users"
+      passwordExpirationTime: "21000101000000Z"
+      userPassword: "{{ rhidm_ldap_user_password }}"
+    state: present
+    validate_certs: "{{ rhidm_validate_certs | default(true) }}"
+  no_log: false
+  tags:
+    - rhidm_config
+    - rhidm_config_defaults
+    - rhidm_config_defaults_ldap_user

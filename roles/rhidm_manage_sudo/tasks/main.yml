@@ -1,0 +1,49 @@
+---
+- name: Manage SUDO Commands
+  freeipa.ansible_freeipa.ipasudocmd:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.sudocmd }}"
+    description: "{{ item.description | default(omit) | trim }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_sudo_cmd_groups | map(attribute='cmds') | list | flatten | unique }}"
+  loop_control:
+    label: "{{ item.sudocmd }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_sudo
+
+- name: Manage SUDO Command Groups
+  freeipa.ansible_freeipa.ipasudocmdgroup:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.sudo_cmdg_name }}"
+    description: "{{ item.description | default(omit) | trim }}"
+    sudocmd: "{{ item.cmds | map(attribute='sudocmd') | list | flatten }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_sudo_cmd_groups }}"
+  loop_control:
+    label: "{{ item.sudo_cmdg_name }}"
+  tags:
+    - rhidm_config
+    - rhidm_config_sudo
+
+- name: Manage sudo RULES
+  freeipa.ansible_freeipa.ipasudorule:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    allow_sudocmd: "{{ item.cmd | default([]) | map(attribute='sudocmd') | list | flatten | default(omit) }}"
+    deny_sudocmd: "{{ item.denycmd | default([]) | map(attribute='sudocmd') | list | flatten | default(omit)  }}"
+    allow_sudocmdgroup: "{{ item.cmdgroup if item.cmdgroup | default([]) | length > 0 else omit }}"
+    deny_sudocmdgroup: "{{ item.deny_cmdgroup if item.deny_cmdgroup | default([]) | length > 0 else omit }}"
+    host: "{{ item.host | default(omit) }}"
+    hostgroup: "{{ item.hostgroup | default(omit) }}"
+    runasgroupcategory: "{{ item.runasgroupcategory | default('all') }}"
+    runasusercategory: "{{ item.runasusercategory | default('all') }}"
+    sudooption: "{{ item.sudoopt | default(omit) }}"
+    usercategory: "{{ item.usercategory | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    group: "{{ item.usergroup | default(omit) }}"
+    state: "{{ item.state | default(present) }}"
+  loop: "{{ rhidm_sudo_rules }}"
+  loop_control:
+    label: "{{ item.name }}"

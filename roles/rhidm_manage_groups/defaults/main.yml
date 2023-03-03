@@ -1,0 +1,33 @@
+---
+# Variables to be defined in the inventory
+
+## Default
+## Users:
+## A list of dictionaries. The whole list is passed as a an argument.
+## The full list of possible parameters can be found at
+## https://github.com/freeipa/ansible-freeipa/blob/master/README-user.md
+rhidm_user_groups: []
+#  - name: idmgroup01
+#    gid: 50000
+#    description: >
+#      IdM group used by Ansible-created users
+#    users:
+#      - jdoe
+#      - psmith
+#    automember_state: present
+#    automember_description: A description for the AM rule
+#    automember_incrules:
+#      - key: cn
+#        expr: 'inexp2'
+#        state: absent
+#    automember_excrules:
+#      - key: cn
+#         expr: 'exexp2'
+#         state: present
+#    subgroups:
+#      - subgroup01
+#      - subgroup02
+#    external: false
+#    externalmember:
+#      - 'ad_domain\aduser1'
+#      - 'ad_domain\aduser2'

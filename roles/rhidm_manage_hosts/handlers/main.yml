@@ -1,0 +1,13 @@
+---
+## Handlers for the automembers
+## When an AM rule is created we rebuild the membership so as existing users are
+## updated too
+
+- name: Rebuild host group membership
+  freeipa.ansible_freeipa.ipaautomember:
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    automember_type: "hostgroup"
+    state: "rebuilt"
+  listen: "Rebuild Host Automember"
+  tags:
+    - rhidm_config_group_auto_member

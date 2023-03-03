@@ -1,0 +1,29 @@
+---
+- name: Manage the IdM User groups
+  freeipa.ansible_freeipa.ipagroup:
+    ipaadmin_principal: "{{ rhidm_admin_principal }}"
+    ipaadmin_password: "{{ rhidm_admin_password }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | trim }}"
+    gid: "{{ item.gid | default(omit) }}"
+    posix: "{{ item.posix | default(__posix) }}"
+    external: "{{ item.external | default(omit) }}"
+    nonposix: "{{ item.nonposix | default(omit) }}"
+    externalmember: "{{ item.externalmember | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ rhidm_user_groups }}"
+  loop_control:
+    label: "{{ item.name }} - {{ item.state | default('present') }}"
+  vars:
+    __posix: "{{ true if ((item.external is undefined and item.nonposix is undefined) or
+      (item.external | default(false) == false
+      and item.nonposix | default(false) == false))
+      else omit }}"
+
+- name: Build the automember variables
+  ansible.builtin.set_fact:
+    rhidm_group_auto_member: "{{ lookup('template', 'templates/automember_rules_users.yml.j2') | from_yaml }}"
+  tags:
+    - rhidm_config_group_auto_member
+
+- import_tasks: manage_automember.yml

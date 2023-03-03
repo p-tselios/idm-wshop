@@ -1,0 +1,18 @@
+---
+# Variables to be defined in the inventory
+
+## Default
+## Hosts:
+## A list of dictionaries. The whole list is passed as a an argument.
+## The full list of possible parameters can be found at
+## https://github.com/freeipa/ansible-freeipa/blob/master/README-host.md
+rhidm_hostgroups[]:
+#  - name: "hgroup_name"
+#    description: "Host group description"
+#    automember: true
+#    automember_incrules:
+#      - key: userclass
+#        expr: 'regex'
+#    automember_excrules:
+#      - key: userclass
+#        expr: 'regex'

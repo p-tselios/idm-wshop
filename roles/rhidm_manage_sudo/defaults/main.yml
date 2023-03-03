@@ -1,0 +1,35 @@
+---
+# Variables to be defined in the inventory
+
+rhidm_sudo_cmd_groups: []
+#  - sudo_cmdg_name: Journalctl NetworkManager
+#    description: "All journalctl related commands for NetworkManager"
+#    cmds:
+#      - sudocmd: /usr/bin/journalctl -u NetworkManager
+#        description: Journal for NetworkManager Unit
+#      - sudocmd: /usr/bin/journalctl -fu NetworkManager
+#        description: Live Journal for NetworkManager Unit
+
+rhidm_sudo_rules: []
+#  - name: "sr_sudo_ocp"
+#    description: "Allow sudo for the group ocp_paas"
+#    state: present
+#    usergroup:
+#      - ocp_paas
+#    cmdgroup:
+#      - "Systemctl NetworkManager"
+#      - "Systemctl etcd"
+#      - "Systemctl docker"
+#      - "Systemctl ocp-master-api"
+#      - "Systemctl ocp-master-ctrl"
+#      - "Systemctl ocp-node"
+#      - "Journalctl NetworkManager"
+#      - "Journalctl network"
+#      - "Journalctl iptables"
+#      - "Journalctl etcd"
+#      - "Journalctl docker"
+#      - "Journalctl OCP mapi"
+#      - "Journalctl OCP master Controllers"
+#      - "Journalctl OCP Nodes"
+#    sudoopt:
+#      - '!authenticate'

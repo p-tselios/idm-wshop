@@ -1,0 +1,58 @@
+---
+# Variables to be defined in the inventory
+
+## The RedHat IdM domain
+# rhidm_domain_name: "example.com"
+
+## Dictionary holding the default password configuration
+rhidm_default_pw_policy: {}
+  #minlength: 12      ## Minimum characters
+  #minclasses: 2      ## Minimum Character Classes used for password complexity
+  #minlife: 24        ## Number of hours until a user can change his password again
+  #maxlife: 180       ## Number of days until password expires
+  #history: 10        ## Number of last passwords to remember
+  #lockouttime: 180   ## Period for which lockout is enforced (seconds)
+  #maxfail: 10        ## Consecutive failures before lockout
+  #failinterval: 180  ## Period after which failure count will be reset (seconds)
+  #state: present
+
+# Default User shell
+# rhidm_defaultshell: ""
+
+# Default group that all new users will be members to
+# rhidm_defaultgroup: ""
+
+# Default email domain for the new users
+# rhidm_emaildomain: "example.net"
+
+# Set list of domains used for short name qualification
+# rhidm_domain_resolution_order: []
+
+## IdM administrator principal. Typically it's admin
+rhidm_admin_principal: "admin"
+
+## The password of the admin principal. You must save this variable in a vault.
+# rhidm_admin_password: ""
+
+## An LDAP user that can be use from applications that support LDAP authentication
+## in order to bind to the DS.
+rhidm_ldap_read_user: "appusers"
+
+## The password for LDAP bind user. You must save this variable in a vault
+# rhidm_ldap_user_password: ""
+
+
+## The password of the Directory Server Manager. Usually it's the same as the
+## admin password.
+rhidm_ds_password: "{{ rhidm_admin_password | default('') }}"
+
+## IdM API Version
+rhidms_api_version: "2.231"
+
+## Trust the IdM certificates? In a production environment you must use
+## only trusted certificates, thus, it should be always set to true.
+rhidm_validate_certs: false
+
+## List of privileges that you want to enable for IdM users or groups.
+##
+# rhidm_privileges: []
